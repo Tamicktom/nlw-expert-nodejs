@@ -1,0 +1,19 @@
+{
+  "name": "nlw-expert-nodejs",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "prisma": "^5.9.1"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "5.9.1",
+    "fastify": "^4.26.0"
+  }
+}

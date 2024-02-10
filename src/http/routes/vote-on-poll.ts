@@ -20,6 +20,23 @@ export async function voteOnPoll(f: FastifyInstance) {
 
     let sessionId = request.cookies.sessionId;
 
+    if (sessionId) {
+      const userPreviousVoteOnPoll = await p.vote.findUnique({
+        where: {
+          sessionId_pollId: {
+            sessionId: sessionId,
+            pollId: voteOnPollParams.pollId,
+          },
+        },
+      });
+
+      if (userPreviousVoteOnPoll) {
+        return response.status(400).send({
+          error: "You have already voted on this poll",
+        });
+      }
+    }
+
     if (!sessionId) {
       sessionId = crypto.randomUUID();
 
@@ -31,6 +48,14 @@ export async function voteOnPoll(f: FastifyInstance) {
       });
     }
 
-    return response.status(201).send({ sessionId });
+    const vote = await p.vote.create({
+      data: {
+        sessionId: sessionId,
+        pollOptionId: voteOnPollBody.pollOptionId,
+        pollId: voteOnPollParams.pollId,
+      },
+    });
+
+    return response.status(201).send(vote);
   });
 }

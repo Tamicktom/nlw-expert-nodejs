@@ -18,16 +18,19 @@ export async function voteOnPoll(f: FastifyInstance) {
     const voteOnPollParams = voteOnPollParamsSchema.parse(request.params);
     const voteOnPollBody = voteOnPollBodySchema.parse(request.body);
 
-    const sessionId = crypto.randomUUID();
+    let sessionId = request.cookies.sessionId;
 
-    response.setCookie("sessionId", sessionId, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      signed: true,
-      httpOnly: true,
-      sameSite: "lax",
-    });
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
 
-    return response.status(201).send();
+      response.setCookie("sessionId", sessionId, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        signed: true,
+        httpOnly: true,
+      });
+    }
+
+    return response.status(201).send({ sessionId });
   });
 }

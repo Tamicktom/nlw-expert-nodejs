@@ -31,8 +31,18 @@ export async function voteOnPoll(f: FastifyInstance) {
       });
 
       if (userPreviousVoteOnPoll) {
+        if (
+          userPreviousVoteOnPoll.pollOptionId !== voteOnPollBody.pollOptionId
+        ) {
+          await p.vote.delete({
+            where: {
+              id: userPreviousVoteOnPoll.id,
+            },
+          });
+        }
+
         return response.status(400).send({
-          error: "You have already voted on this poll",
+          message: "You have already voted on this poll",
         });
       }
     }

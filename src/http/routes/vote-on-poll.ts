@@ -4,6 +4,7 @@ import type { FastifyInstance } from "fastify";
 
 //* Local imports
 import { p } from "../../lib/prisma";
+import { redis } from "../../lib/redis";
 
 const voteOnPollBodySchema = z.object({
   pollOptionId: z.string().uuid(),
@@ -39,6 +40,12 @@ export async function voteOnPoll(f: FastifyInstance) {
               id: userPreviousVoteOnPoll.id,
             },
           });
+
+          await redis.zincrby(
+            `poll:${voteOnPollParams.pollId}`,
+            -1,
+            userPreviousVoteOnPoll.pollOptionId
+          );
         }
 
         return response.status(400).send({
@@ -65,6 +72,12 @@ export async function voteOnPoll(f: FastifyInstance) {
         pollId: voteOnPollParams.pollId,
       },
     });
+
+    await redis.zincrby(
+      `poll:${voteOnPollParams.pollId}`,
+      1,
+      voteOnPollBody.pollOptionId
+    );
 
     return response.status(201).send(vote);
   });
